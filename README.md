@@ -28,6 +28,46 @@ OPENAI_API_KEY="sk-..."
 ACTIVELOOP_API_KEY="ey..."
 ACTIVELOOP_ORG_ID="your-activeloop-org-id"
 
+Usage
+The main.py script serves as the entry point for running the application.
+
+Configure URLs: Open main.py and modify the urls list to include the PDF financial reports you want to analyze. The repository is pre-configured with links to Amazon's quarterly reports from 2018 to 2022.
+
+Process and Store Documents (First-time setup): The first time you run the script for a new set of documents, you need to process them and store their embeddings in DeepLake. Uncomment the following lines in main.py:
+
+# In main.py
+
+loader = PDFReportLOader(urls)
+all_pages = loader.load_reports()
+
+print(f"Total pages extracted: {len(all_pages)}")
+
+embed_text = EmbeddingFinData()
+embed_text.process_n_store(all_pages)
+Run the script. This will download the PDFs, process them, and populate your DeepLake dataset. This can take some time depending on the number and size of documents.
+
+Ask Questions: Once the embeddings are stored, you can comment out the processing lines from step 2. The main logic will then initialize from the existing DeepLake dataset and allow you to ask questions.
+
+# In main.py
+
+# After running the processing step once, you can comment it out
+# loader = PDFReportLOader(urls)
+# all_pages = loader.load_reports()
+# print(f"Total pages extracted: {len(all_pages)}")
+
+embed_text = EmbeddingFinData()
+# embed_text.process_n_store(all_pages)
+
+# Initialize the retriever and QA chain
+embed_text.retrive_data()
+
+# Ask a question
+response = embed_text.ask_question("What was Amazon's revenue in Q1 2018")
+
+# Add more questions as needed
+response_2 = embed_text.ask_question("What were the net sales for Q4 2022?")
+Run the script python main.py to see the answers printed to the console.
+
 Code Structure
 main.py: The main script that orchestrates the data loading, embedding, and question-answering process. Contains the list of target PDF URLs.
 financedata.py: Defines the PDFReportLOader class, responsible for downloading PDFs from URLs and extracting text content using LangChain's PyPDFLoader.
